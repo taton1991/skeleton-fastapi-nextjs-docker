@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  api:
+    build: ./backend
+    container_name: api
+    env_file:
+      - ./backend/.env.example
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/rules.json:/app/rules.json:ro
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build: ./frontend
+    container_name: web
+    env_file:
+      - ./frontend/.env.example
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    command: npm run dev
+
+networks:
+  default:
+    name: skeleton_net
