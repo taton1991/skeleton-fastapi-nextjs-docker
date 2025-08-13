@@ -1,21 +1,17 @@
-version: "3.9"
-
 services:
   api:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    env_file:
-      - ./backend/.env.example
-    networks: [app]
+    restart: unless-stopped
 
   web:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    env_file:
-      - ./frontend/.env.example
-    networks: [app]
+    depends_on:
+      - api
+    restart: unless-stopped
 
   nginx:
     build: ./nginx
@@ -24,8 +20,4 @@ services:
       - web
     ports:
       - "80:80"
-    networks: [app]
-
-networks:
-  app:
-    name: skeleton_prod_net
+    restart: unless-stopped
