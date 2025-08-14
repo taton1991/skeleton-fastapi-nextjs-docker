@@ -1,4 +1,4 @@
-name: Deploy
+name: deploy
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Copy project to server
-        uses: burnett01/rsync-deployments@v7.0.1
+        uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -avzr --delete
           path: ./
