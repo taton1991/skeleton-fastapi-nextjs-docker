@@ -1,8 +1,8 @@
-name: Deploy
+name: deploy
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -14,19 +14,19 @@ jobs:
       - name: Copy project to server
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avzr --delete
+          switches: -azvr --delete --exclude ".git/" --exclude ".DS_Store"
           path: ./
           remote_path: /opt/skeleton
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_KEY }}
+          remote_key:  ${{ secrets.SSH_KEY }}
 
       - name: Compose up (build & restart)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host:     ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          key:      ${{ secrets.SSH_KEY }}
           script: |
             set -e
             cd /opt/skeleton
