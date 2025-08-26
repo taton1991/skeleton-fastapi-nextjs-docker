@@ -1,8 +1,15 @@
 FROM node:18-alpine
+
 WORKDIR /app
+
+# Контекст = ./frontend
 COPY package*.json ./
 RUN npm ci || npm install
+
+# Копируем исходники
 COPY . .
+
 RUN npm run build
+
 EXPOSE 3000
 CMD ["npm","run","start"]

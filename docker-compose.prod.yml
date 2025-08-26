@@ -14,7 +14,8 @@ services:
     restart: unless-stopped
 
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
     depends_on:
       - api
       - web
