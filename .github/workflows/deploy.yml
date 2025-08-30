@@ -2,7 +2,7 @@ name: deploy
 
 on:
   push:
-    branches: ["main"]   # если ваша ветка другая, поменяйте тут
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -11,16 +11,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy project to server
-        uses: burnett01/rsync-deployments@v7.0.1
+      # 1) Создадим папку назначения на сервере (если её нет)
+      - name: Ensure /opt/skeleton exists
+        uses: appleboy/ssh-action@v1.2.0
         with:
-          switches: -azvr --delete --exclude ".git/" --exclude ".DS_Store"
-          path: ./
-          remote_path: /opt/skeleton
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key:  ${{ secrets.SSH_KEY }}
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key:      ${{ secrets.SSH_KEY }}
+          script: |
+            mkdir -p /opt/skeleton
 
+      # 2) Скопируем проект rsync'ом
+      - name: Copy project to server (rsync)
+        uses: easingthemes/ssh-deploy@v4
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }} # твой приватный ключ из Secrets
+          ARGS: -azvr --delete --exclude=".git/" --exclude=".DS_Store"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          TARGET: "/opt/skeleton"
+
+      # 3) Соберём и поднимем контейнеры на сервере
       - name: Compose up (build & restart)
         uses: appleboy/ssh-action@v1.2.0
         with:
